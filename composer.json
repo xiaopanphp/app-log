@@ -3,6 +3,7 @@
     "type": "library",
     "description": "App Log PSR-4 SDK",
     "license": "MIT",
+    "minimum-stability": "stable",
     "authors": [
         {
             "name": "panqiang",

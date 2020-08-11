@@ -2,7 +2,7 @@
 
 namespace Jiedian\AppLog;
 
-class AppLog
+class Log
 {
     public static function writeLog()
     {
