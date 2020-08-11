@@ -10,16 +10,6 @@
     }
   ],
   "minimum-stability": "stable",
-  "repositories": [
-    {
-      "type": "composer",
-      "url": "https://packagist.int.jiediankeji.com/repo/private/"
-    },
-    {
-      "type": "composer", 
-      "url": "https://mirrors.aliyun.com/composer/"
-    }
-  ],
   "autoload": {
     "psr-4": {
       "AppLogUtil\\": "src/AppLog"
