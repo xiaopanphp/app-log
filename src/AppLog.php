@@ -1,7 +1,6 @@
 <?php
 
-
-namespace AppLogUtil;
+namespace Jiedian\AppLog;
 
 class AppLog
 {

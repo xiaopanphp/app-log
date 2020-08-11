@@ -1,0 +1,20 @@
+{
+    "name" : "jiedian/app-log",
+    "type": "library",
+    "description": "App Log PSR-4 SDK",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "panqiang",
+            "email": "qiang.pan@jiediankeji.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jiedian\\AppLog\\" : "src/"
+        }
+    } 
+}
