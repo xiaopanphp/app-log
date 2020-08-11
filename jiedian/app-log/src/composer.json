@@ -1,0 +1,31 @@
+{
+  "name": "jiedian/app-log",
+  "description": "业务日志",
+  "version": "0.0.13",
+  "type": "library",
+  "authors": [
+    {
+      "name": "panqiang",
+      "email": "qiang.pan@jiediankeji.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packagist.int.jiediankeji.com/repo/private/"
+    },
+    {
+      "type": "composer", 
+      "url": "https://mirrors.aliyun.com/composer/"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "AppLogUtil\\": "src/AppLog"
+    }
+  },
+  "require": {
+    "php": ">=5.6.0",
+  }
+}
