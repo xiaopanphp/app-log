@@ -3,11 +3,24 @@
     "type": "library",
     "description": "App Log PSR-4 SDK",
     "license": "MIT",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "authors": [
         {
             "name": "panqiang",
             "email": "qiang.pan@jiediankeji.com"
+        }
+    ],
+    "repositories":[
+        {
+            "packagist":false
+        },
+        {
+            "type":"composer",
+            "url":"https://packagist.int.jiediankeji.com/"
+        },
+        {
+            "type": "composer", 
+            "url": "https://mirrors.aliyun.com/composer/"
         }
     ],
     "require": {

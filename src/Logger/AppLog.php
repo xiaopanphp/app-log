@@ -4,6 +4,8 @@
  */
 namespace Jiedian\AppLog\Logger;
 
+use Jiedian\AppLog\Exception\RequestException;
+
 abstract class AppLog
 {
     const DEBUG     = 'DEBUG';
@@ -15,15 +17,64 @@ abstract class AppLog
     const ALERT     = 'ALERT';
     const EMERGENCY = 'EMERGENCY';
     
-
+    /**
+     * 业务日志配置
+     * @var array
+     */
     public $config = [];
 
-    public $delimiter = '>';
+    /**
+     * 分隔符
+     * @var string
+     */
+    public $delimiter = ' ';
+
+    /**
+     * 记录器名称
+     * @var string
+     */
+    public $channel;
+
+    /**
+     * 主机名称
+     * @var string
+     */
+    public $hostName;
+
+    /**
+     * 系统名称
+     * @var string
+     */
+    public $systemName;
+
+    /**
+     * 是否能写如开关
+     * @var bool
+     */
+    public $isWrite;
+
+    /**
+     * 标签配置
+     * @var array
+     */
+    public $tagConfig;
+
+
+    /**
+     * traceId
+     * @var string
+     */
+    public $traceId;
 
     /**
      * 初始化
+     * array (
+      'on'  => true,
+      'app' => 'api-test',
+      'tag' => array('app' => '/home/logs/app.log'),
+    );
      */
-    public function __construct()
+    public function __construct($tag)
     {
         // laravel 环境
         if (class_exists('\LaravelPhpClient\Facades\PhpClient')) {
@@ -31,7 +82,26 @@ abstract class AppLog
         } else {
             $mnloggerConfig = (array) new \Config\MNLogger;
         }
-        $this->config = !empty($mnloggerConfig['appLog']) ? $mnloggerConfig['appLog'] : array();
+        //设置记录器
+        $this->channel = $tag;
+        //读取业务日志
+        $this->config  = !empty($mnloggerConfig['appLog']) ? $mnloggerConfig['appLog'] : array();
+        //获取业务日志失败
+        if (empty($this->config)) {
+            throw new RequestException(RequestException::LOG_OPTION_ERROR);
+        }
+        $this->traceId    = '';
+        //获取主机名称
+        $this->hostName   = (string) gethostname();
+        //获取系统名称
+        $this->systemName = !empty($this->config['app']) ? $this->config['app'] : '';
+        //获取写入开关
+        $this->isWrite    = !empty($this->config['on']) ? true : false;
+        //标签配置
+        $this->tagConfig  = !empty($this->config['tag']) ? $this->config['tag'] : [];
+        if (empty($this->tagConfig[$this->channel])) {
+            throw new RequestException(RequestException::TAG_OPTION_ERROR);
+        }
     }
     /**
      * debug写日志方法

@@ -9,11 +9,6 @@ use Jiedian\AppLog\Logger\Monolog;
 
 class Log
 {
-    /**
-     * 业务日志配置
-     */
-    private $appLogOptions;
-
     private static $instanceArr = [];
 
     private function __construct()
@@ -24,11 +19,11 @@ class Log
     {
     }
 
-    public static function getInstance($tag, $logType = 'Monolog')
+    public static function getInstance($tag)
     {
         if (!isset(self::$instanceArr[$tag])) {
-            self::$instanceArr[$tag] = new $logType($tag);
+            self::$instanceArr[$tag] = new Monolog($tag);
         }
-        return self::$instance[$tag];
+        return self::$instanceArr[$tag];
     }
 }

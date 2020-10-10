@@ -8,10 +8,15 @@ use Monolog\Logger;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Jiedian\AppLog\Exception\RequestException;
-use AppLog;
+use Jiedian\AppLog\Logger\AppLog;
 
 class Monolog extends AppLog
 {
+    /**
+     * 默认记录器实例
+     * @var string
+     */
+    private $defaultLogger = 'default';
     /**
      * 输出格式
      * @var string
@@ -25,51 +30,38 @@ class Monolog extends AppLog
     private $dateFormat;
 
     /**
-     * 系统名称
-     * @var string
-     */
-    private $systemName;
-
-    /**
-     * 主机名称
-     * @var string
-     */
-    private $hostName;
-
-    /**
      * 记录器实例
      * @var object
      */
     private $logger;
 
     /**
-     * 记录器名称
-     * @var string
-     */
-    private $channel;
-
-    /**
      * 初始化
      */
     public function __construct($tag)
     {
-        //获取业务日志配置
-        parent::__construct();
-        $config = !empty($this->config[$tag]) ? $this->config[$tag] : [];
-        if (empty($config['logFile'])) {
-            throw new RequestException(RequestException::LOG_OPTION_ERROR);
+        try {
+            //获取业务日志配置
+            parent::__construct($tag);
+            //获取日志文件
+            $logFile = $this->tagConfig[$tag];
+            //设置日志格式
+            $this->setLogFormat();
+            //获取monolog日志实例
+            $logger    = new Logger($tag);
+            //申请一个按天分的日志文件处理器
+            $stream    = new RotatingFileHandler($logFile, Logger::DEBUG); //每天一个文件
+            //定义日志文件格式
+            $formatter = new LineFormatter($this->outputFormat, $this->dateFormat); //自定义日志格式
+            //日志格式应用到处理器
+            $stream->setFormatter($formatter);
+            //日志处理器放入处理器栈
+            $logger->pushHandler($stream);
+        } catch (RequestException $e) {
+            $logger = new Logger($this->defaultLogger);
+            $this->isWrite = false;
         }
-        $logFile = $config['logFile'];
-        //设置公共参数
-        $this->setCommonData();
-
-        $logger    = new Logger($tag);
-        $stream    = new RotatingFileHandler($logFile, Logger::INFO); //每天一个文件
-        $formatter = new LineFormatter($this->outputFormat, $this->dateFormat); //自定义日志格式
-        $stream->setFormatter($formatter);
-        $logger->pushHandler($stream);
         $this->logger  = $logger;
-        $this->channel = $tag;
     }
 
     /**
@@ -161,15 +153,13 @@ class Monolog extends AppLog
     }
 
     /**
-     * 设置公共数据
+     * 设置日志格式
      * @return void
      */
-    private function setCommonData()
+    private function setLogFormat()
     {
         $this->dateFormat   = 'c'; //2020-10-09T11:44:21+08:00带时区格式
-        $this->outputFormat = "[%datetime%] {$this->delimiter} %message% {$this->delimiter} %context%\n";
-        $this->systemName   = 'crm-api';
-        $this->hostName     = 'panqiang';
+        $this->outputFormat = "[%datetime%]{$this->delimiter}%message%{$this->delimiter}%context%\n";
     }
 
     /**
@@ -181,25 +171,27 @@ class Monolog extends AppLog
      */
     private function writeLog($level, $message, $context)
     {
-        if ($this->check()) {
+        if ($this->check($message)) {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
             array_shift($trace);
             $file = !empty($trace[0]['file']) ? $trace[0]['file'] : '';
             $line = !empty($trace[0]['line']) ? $trace[0]['line'] : '';
-            $traceId = '2009';
             
-            $message = "{$this->systemName} {$this->delimiter} {$this->channel} {$this->delimiter} {$level} {$this->delimiter} {$this->hostName} {$this->delimiter} {$file}"."[{$line}] {$this->delimiter} {$traceId} {$this->delimiter} {$message}";
+            $message = "{$this->systemName}{$this->delimiter}{$this->channel}{$this->delimiter}{$level}{$this->delimiter}{$this->hostName}{$this->delimiter}{$file}"."[{$line}]{$this->delimiter}{$this->traceId}{$this->delimiter}{$message}";
             $this->logger->log($level, $message, $context);
         }
     }
 
     /**
-     * 检查日志内容格式
+     * 检查日志是否能写入
      * @param  string $message 日志内容
      * @return bool
      */
     private function check($message)
     {
+        if (!$this->isWrite) {
+            return false;
+        }
         if (!is_string($message) && !is_numeric($message) && !is_bool($message)) {
             return false;
         }
