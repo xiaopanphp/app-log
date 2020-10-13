@@ -159,7 +159,7 @@ class Monolog extends AppLog
     private function setLogFormat()
     {
         $this->dateFormat   = 'c'; //2020-10-09T11:44:21+08:00带时区格式
-        $this->outputFormat = "[%datetime%]{$this->delimiter}%message%{$this->delimiter}%context%\n";
+        $this->outputFormat = "[%datetime%]{$this->delimiter}%message%{$this->delimiter}%context%{$this->endDelimiter}\n";
     }
 
     /**
@@ -174,8 +174,8 @@ class Monolog extends AppLog
         if ($this->check($message)) {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
             array_shift($trace);
-            $file = !empty($trace[0]['file']) ? $trace[0]['file'] : '';
-            $line = !empty($trace[0]['line']) ? $trace[0]['line'] : '';
+            $file = !empty($trace[0]['file']) ? $trace[0]['file'] : $this->defaultValue;
+            $line = !empty($trace[0]['line']) ? $trace[0]['line'] : $this->defaultValue;
             
             $message = "{$this->systemName}{$this->delimiter}{$this->channel}{$this->delimiter}{$level}{$this->delimiter}{$this->hostName}{$this->delimiter}{$file}"."[{$line}]{$this->delimiter}{$this->traceId}{$this->delimiter}{$message}";
             $this->logger->log($level, $message, $context);

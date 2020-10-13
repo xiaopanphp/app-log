@@ -27,7 +27,13 @@ abstract class AppLog
      * 分隔符
      * @var string
      */
-    public $delimiter = ' ';
+    public $delimiter = "\001";
+
+    /**
+     * 结束分隔符
+     * @var string
+     */
+    public $endDelimiter = "\004";
 
     /**
      * 记录器名称
@@ -67,6 +73,13 @@ abstract class AppLog
     public $traceId;
 
     /**
+     * 默认值
+     * @var string
+     */
+    public $defaultValue = '-';
+
+
+    /**
      * 初始化
      * array (
       'on'  => true,
@@ -79,8 +92,11 @@ abstract class AppLog
         // laravel 环境
         if (class_exists('\LaravelPhpClient\Facades\PhpClient')) {
             $mnloggerConfig = config('mnlogger', array());
-        } else {
+        } else if (class_exists('\Config\MNLogger')) {
+            //phpserver 环境
             $mnloggerConfig = (array) new \Config\MNLogger;
+        } else {
+            $mnloggerConfig = array();
         }
         //设置记录器
         $this->channel = $tag;
@@ -90,11 +106,11 @@ abstract class AppLog
         if (empty($this->config)) {
             throw new RequestException(RequestException::LOG_OPTION_ERROR);
         }
-        $this->traceId    = '';
+        $this->traceId    = !empty(getenv('traceId')) ? getenv('traceId') : $this->defaultValue;
         //获取主机名称
         $this->hostName   = (string) gethostname();
         //获取系统名称
-        $this->systemName = !empty($this->config['app']) ? $this->config['app'] : '';
+        $this->systemName = !empty($this->config['app']) ? $this->config['app'] : $this->defaultValue;
         //获取写入开关
         $this->isWrite    = !empty($this->config['on']) ? true : false;
         //标签配置
